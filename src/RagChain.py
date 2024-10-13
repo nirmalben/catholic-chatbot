@@ -3,13 +3,12 @@ from JsonDocumentLoader import JsonDocumentLoader
 from langchain_community.embeddings import HuggingFaceInferenceAPIEmbeddings
 from langchain_core.documents.base import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.vectorstores import Pinecone
-
+from langchain_pinecone import PineconeVectorStore
+from pinecone import Pinecone, ServerlessSpec
 from typing import List
 
 import itertools
 import os
-import pinecone
 
 PINECONE_INDEX_NAME = "catholic-chatbot-index"
 
@@ -30,7 +29,7 @@ class RagChain():
       return JsonDocumentLoader(
         json_file_path='./data/nabre.json',
         metadata_func=metadata_func,
-        jq_schema='.[] | . as $grandparent | .chapters[] | . as $parent | .verses[] | {book: $grandparent.book, chapter: $parent.chapter, verse: .verse, text: .text}',
+        jq_schema='.[] | . as $grandparent | .chapters[] | . as $parent | .verses[] | {book: $grandparent.book, chapter: $parent.chapter, verse: .verse, text: .text}'
       ).get_documents()
 
     def _load_documents(self) -> List[Document]:
@@ -52,34 +51,44 @@ class RagChain():
       text_splitter = RecursiveCharacterTextSplitter(chunk_size=1600, chunk_overlap=200)
       chunks = text_splitter.split_documents(documents)
       return chunks
+    
+    def _get_vector_store(self, chunks, embeddings):
+      pc = Pinecone(api_key= os.getenv('PINECONE_API_KEY'))
+      existing_indexes = [index_info["name"] for index_info in pc.list_indexes()]
+
+      is_index_new = False
+      if PINECONE_INDEX_NAME not in existing_indexes:
+        is_index_new = True
+        pc.create_index(
+          name=PINECONE_INDEX_NAME,
+          dimension=1024,
+          spec=ServerlessSpec(cloud="aws", region="us-east-1"),
+          metric="cosine")
+      index = pc.Index(PINECONE_INDEX_NAME)
+      
+      if is_index_new:
+        PineconeVectorStore.from_documents(chunks, embeddings, index_name=PINECONE_INDEX_NAME)
+
+      return PineconeVectorStore(index=index, embedding=embeddings)
 
     def _build(self):
       # Load documents
       documents = self._load_documents()
       
       # Split documents into chunks
-      chunks = self._split_to_chunks(documents)
+      chunks = self._split_to_chunks(documents=documents)
       
       # Initialize embeddings
       embeddings = HuggingFaceInferenceAPIEmbeddings(
         api_key=self._HUGGING_FACE_API_KEY, 
-        model_name="thenlper/gte-large"
-      )
+        model_name="thenlper/gte-large") # https://huggingface.co/thenlper/gte-large
 
       # Vectorstore for the chunks
-      pinecone.init(api_key= os.getenv('PINECONE_API_KEY'))
-
-      if PINECONE_INDEX_NAME not in pinecone.list_indexes():
-        pinecone.create_index(name=PINECONE_INDEX_NAME, metric="cosine", dimension=768)
-        vector_store = Pinecone.from_documents(chunks, embeddings, index_name=PINECONE_INDEX_NAME)
-      else:
-        vector_store = Pinecone.from_existing_index(PINECONE_INDEX_NAME, embeddings)
-
+      vector_store = self._get_vector_store(chunks=chunks, embeddings=embeddings)
+      
       # Retriever
       
-      
       # Memory
-      
       
       # Conversational chain
     
