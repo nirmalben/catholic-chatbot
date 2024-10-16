@@ -7,7 +7,9 @@ class DocumentLoader(ABC):
   def __init__(self, file_path: str) -> None:
     self.file_path = file_path
     self.documents = []
+    self._load()
   
+  @abstractmethod
   def _load(self) -> None:
     # Populates self.documents
     pass
