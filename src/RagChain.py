@@ -29,6 +29,7 @@ class RagChain():
       metadata["book"] = record.get("book")
       metadata["chapter"] = record.get("chapter")
       metadata["verse"] = record.get("verse")
+      metadata["from"] = "New American Bible (Revised Edition) (NABRE)"
       return metadata
     
     return JsonDocumentLoader(
@@ -40,15 +41,21 @@ class RagChain():
   def _load_documents(self) -> List[Document]:
     nabre_bible_doc = self._load_bible()
     
-    catechism_doc = JsonDocumentLoader(json_file_path=self.parent_path + '/data/catechism.json').get_documents()
+    catechism_doc = JsonDocumentLoader(
+      json_file_path=self.parent_path + '/data/catechism.json',
+      jq_schema='.[] | {id: (.id | tonumber), text: .text, from: "Catechism of the Catholic Church" }'
+    ).get_documents()
 
     canon_doc = JsonDocumentLoader(
       json_file_path=self.parent_path + '/data/canon.json',
-      jq_schema='.[] | if has("sections") then . as $section | .sections[] | {id: [($section.id | tostring), (.id | tostring)] | join(".") | tonumber, text: .text} else {id: (.id | tonumber), text: .text} end'
+      jq_schema='.[] | if has("sections") then . as $section | .sections[] | {id: [($section.id | tostring), (.id | tostring)] | join(".") | tonumber, text: .text, from: "Canon law of the Catholic Church"} else {id: (.id | tonumber), text: .text, from: "Canon law of the Catholic Church" } end'
     ).get_documents()
     
     # General Instruction of the Roman Missal
-    girm_doc = JsonDocumentLoader(json_file_path=self.parent_path + '/data/girm.json').get_documents() 
+    girm_doc = JsonDocumentLoader(
+      json_file_path=self.parent_path + '/data/girm.json',
+      jq_schema='.[] | {id: (.id | tonumber), text: .text, from: "General Instruction of the Roman Missal"}'
+    ).get_documents() 
     
     documents = [nabre_bible_doc, catechism_doc, canon_doc, girm_doc]
     return list(itertools.chain(*documents)) # converts List[List[Documents]] to List[Documents]
@@ -77,36 +84,29 @@ class RagChain():
     print("Initialize vector store...")
     vector_store = ChromaVectorStorage(chunks=chunks, embeddings=embeddings).get_vector_store()
 
-    print("Perform similarity search...")
+    # print("Perform similarity search...")
     print(vector_store.similarity_search("Mother Mary is our intercessor."))
     
     # Retriever
     retriever = CompressionRetriever(base_retriever=vector_store.as_retriever(), embeddings=embeddings).get_retriever()
     
     # Memory
-    memory = ConversationBufferMemory(return_messages=True, memory_key="chat_history", output_key="answer", input_key="question")
+    self.memory = ConversationBufferMemory(return_messages=True, memory_key="chat_history", output_key="answer", input_key="question")
     
     # Conversational chain
     condense_question_prompt = PromptTemplate(
       input_variables=["chat_history", "question"],
-      template="""Given the following conversation and a follow up question, 
-      rephrase the follow up question to be a standalone question, in its original language.\n\n
+      template="""Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language.\n\n
       Chat History:\n{chat_history}\n
       Follow Up Input: {question}\n
       Standalone question:""")
     
-    answer_template = """You will be asked about questions on and using Catholicism. 
-    Answer the question at the end, using only the following context (delimited by <context></context>). 
-    If you don't know the answer, you can say that you don't know. 
-    Your answers should be concise as possible.
+    answer_template = """You are an expert that is able to look up all information or offer thoughts about/using Catholicism. You have been asked the following question and if the question pertains to something that can answered with Catholicism, using the following context. If the question is generic, does not pertain to Catholicism or does not relate to Catholicism, you can say that the question cannot be answered with Catholicism.\n\n
+    Chat History:\n{chat_history}\n
+    Context:\n{context}\n
     
-    <context>
-    {chat_history}
-    {context} 
-    </context>
-    
-    Question: {question}
-    """
+    Question:{question}\n
+    Answer:"""
     answer_prompt = ChatPromptTemplate.from_template(answer_template)
 
     standalone_query_llm = HuggingFaceHub(
@@ -135,7 +135,7 @@ class RagChain():
         combine_docs_chain_kwargs={"prompt": answer_prompt},
         condense_question_llm=standalone_query_llm,
         llm=response_llm,
-        memory=memory,
+        memory=self.memory,
         retriever=retriever,
         chain_type="stuff",
         verbose=False,
@@ -143,6 +143,9 @@ class RagChain():
   
   def get_chain(self):
     return self.chain
+  
+  def clear_memory(self):
+    self.memory.clear()
     
 if __name__ == '__main__':
   _ = RagChain()

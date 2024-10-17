@@ -5,6 +5,8 @@ from DocumentLoader import DocumentLoader
 class JsonDocumentLoader(DocumentLoader):
   def _default_metadata_func(record: dict, metadata: dict) -> dict:
     metadata["id"] = record.get("id")
+    if "from" in record:
+      metadata["from"] = record["from"]
     return metadata
 
   def __init__(self, json_file_path: str, jq_schema='.[]', metadata_func=_default_metadata_func, content_key='text') -> None:
