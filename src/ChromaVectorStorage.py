@@ -15,8 +15,8 @@ class ChromaVectorStorage(VectorStorage):
     super().__init__(chunks=chunks, embeddings=embeddings)
 
   def _load_storage(self) -> None:
-    is_existing_collection = self.collection_name in [c.name for c in self.chroma_client.list_collections()]
     # self.chroma_client.delete_collection(name=self.collection_name)
+    is_existing_collection = self.collection_name in [c.name for c in self.chroma_client.list_collections()]
   
     collection = self.chroma_client.get_or_create_collection(self.collection_name)
     
