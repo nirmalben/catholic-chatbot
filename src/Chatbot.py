@@ -2,23 +2,27 @@ from RagChain import RagChain
 import streamlit as st
 
 class Chatbot():
+  def __init__(self) -> None:
+    self.rag = RagChain()
+  
   def _clear_chat_history(self):
     st.session_state.messages = [
       {
         "role": "assistant",
-        "content": "How can I assist you today? Let me know your questions and I can answer your queries based on Catholicism",
+        "content": "I am an expert in Catholicism. How can I assist you today?",
       }
     ]
-    st.session_state.memory.clear()
+    self.rag.clear_memory()
     
   def _get_response(self, prompt):
-    response = RagChain().get_chain().invoke({"question": prompt})
+    response = self.rag.get_chain().invoke({"question": prompt})
+    
     answer = response["answer"]
-
-    answer = answer[answer.find("\nAnswer: ") + len("\nAnswer: ") :]
-
+    answer = answer[answer.find("Answer:") + len("Answer:") :]
+    
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.session_state.messages.append({"role": "assistant", "content": answer})
+    
     st.chat_message("user").write(prompt)
     with st.chat_message("assistant"):
       st.markdown(answer)
@@ -26,13 +30,15 @@ class Chatbot():
         documents_content = ""
         for document in response["source_documents"]:
           try:
-            page = " (Page: " + str(document.metadata["page"]) + ")"
+            source = str(document.metadata["from"]) + " (#" + str(document.metadata["id"]) + ")"
           except:
-            page = ""
+            book = str(document.metadata["book"])
+            chapter = str(document.metadata["chapter"])
+            verse = str(document.metadata["verse"])
+            source = str(document.metadata["from"]) + " (" + book + " " + chapter + ":" + verse + ")"
           documents_content += (
             "**Source: "
-            + str(document.metadata["source"])
-            + page
+            + source
             + "**\n\n"
           )
           documents_content += document.page_content + "\n\n\n"
@@ -43,9 +49,9 @@ class Chatbot():
     with st.sidebar:
       st.title('Catholic Chatbot')
     
-    col1, col2 = st.columns([7, 3])
+    col1, col2 = st.columns([7, 2])
     with col1:
-      st.subheader("Chat with your data")
+      st.subheader("Chat")
     with col2:
       st.button("Clear Chat History", on_click=self._clear_chat_history)
 
@@ -53,7 +59,7 @@ class Chatbot():
       st.session_state.messages = [
         {
           "role": "assistant",
-          "content": "How can I assist you today? Let me know your questions and I can answer your queries based on Catholicism",
+          "content": "I am an expert in Catholicism. How can I assist you today?",
         }
       ]
     
