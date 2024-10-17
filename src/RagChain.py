@@ -12,7 +12,6 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pathlib import Path
 from typing import List
 
-
 import itertools
 import os
 
@@ -85,7 +84,7 @@ class RagChain():
     vector_store = ChromaVectorStorage(chunks=chunks, embeddings=embeddings).get_vector_store()
 
     # print("Perform similarity search...")
-    print(vector_store.similarity_search("Mother Mary is our intercessor."))
+    # print(vector_store.similarity_search("Mother Mary is our intercessor."))
     
     # Retriever
     retriever = CompressionRetriever(base_retriever=vector_store.as_retriever(), embeddings=embeddings).get_retriever()
@@ -101,7 +100,7 @@ class RagChain():
       Follow Up Input: {question}\n
       Standalone question:""")
     
-    answer_template = """You are an expert that is able to look up all information or offer thoughts about/using Catholicism. You have been asked the following question and if the question pertains to something that can answered with Catholicism, using the following context. If the question is generic, does not pertain to Catholicism or does not relate to Catholicism, you can say that the question cannot be answered with Catholicism.\n\n
+    answer_template = """You are an expert that is able to look up all information on Catholicism and offer tips on using Catholicism in life. You have been asked the following question and if the question pertains to something that can answered with Catholicism, using the following context, you can answer it. If the question is generic, does not pertain to Catholicism or does not relate to Catholicism, you can say that the question cannot be answered with Catholicism.\n\n
     Chat History:\n{chat_history}\n
     Context:\n{context}\n
     
