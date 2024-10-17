@@ -2,8 +2,8 @@ from RagChain import RagChain
 import streamlit as st
 
 class Chatbot():
-  def __init__(self) -> None:
-    self.rag = RagChain()
+  def __init__(self, rag) -> None:
+    self.rag = rag
   
   def _clear_chat_history(self):
     st.session_state.messages = [
@@ -45,15 +45,10 @@ class Chatbot():
         st.markdown(documents_content)
   
   def run(self):
-    st.set_page_config(page_title="Catholic Chatbot")
+    st.set_page_config(page_title="Catholic Chatbot",  layout="wide")
     with st.sidebar:
-      st.title('Catholic Chatbot')
-    
-    col1, col2 = st.columns([7, 2])
-    with col1:
-      st.subheader("Chat")
-    with col2:
       st.button("Clear Chat History", on_click=self._clear_chat_history)
+    st.subheader("Catholic Chatbot")
 
     if "messages" not in st.session_state:
       st.session_state.messages = [
@@ -71,4 +66,4 @@ class Chatbot():
         self._get_response(prompt=prompt)
 
 if __name__ == "__main__":
-  Chatbot().run()
+  Chatbot(rag=RagChain()).run()
