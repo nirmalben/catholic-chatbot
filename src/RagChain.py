@@ -1,6 +1,5 @@
 from ChromaVectorStorage import ChromaVectorStorage
 from CompressionRetriever import CompressionRetriever
-from dotenv import load_dotenv
 from JsonDocumentLoader import JsonDocumentLoader
 from langchain.chains.conversational_retrieval.base import ConversationalRetrievalChain
 from langchain_community.embeddings import HuggingFaceInferenceAPIEmbeddings
@@ -14,14 +13,12 @@ from pathlib import Path
 from typing import List
 
 import itertools
-import os
 
 LLM_NAME = 'mistralai/Mixtral-8x7B-Instruct-v0.1' # https://huggingface.co/mistralai/Mixtral-8x7B-Instruct-v0.1
 
 class RagChain():
-  def __init__(self) -> None:
-    load_dotenv()
-    self._HUGGING_FACE_API_KEY = os.getenv('HUGGING_FACE_API_KEY')
+  def __init__(self, _HUGGING_FACE_API_KEY:str) -> None:
+    self._HUGGING_FACE_API_KEY = _HUGGING_FACE_API_KEY
     self.chain = None
     self.parent_path = Path(__file__).resolve().parent.parent.as_posix()
     self._build()
