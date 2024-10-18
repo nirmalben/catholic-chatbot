@@ -1,3 +1,7 @@
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
 from chromadb.utils.batch_utils import create_batches
 from langchain_chroma import Chroma
 from langchain_core.documents.base import Document
