@@ -1,3 +1,4 @@
+from PIL import Image
 from RagChain import RagChain
 import streamlit as st
 
@@ -9,7 +10,7 @@ class Chatbot():
     st.session_state.messages = [
       {
         "role": "assistant",
-        "content": "I am an expert in Catholicism. How can I assist you today?",
+        "content": "How can I assist you today?",
       }
     ]
     self.rag.clear_memory()
@@ -18,13 +19,14 @@ class Chatbot():
     response = self.rag.get_chain().invoke({"question": prompt})
     
     answer = response["answer"]
-    answer = answer[answer.find("Answer:") + len("Answer:") :]
+    # print(answer)
+    # answer = answer[answer.find("Answer:") + len("Answer:") :]
     
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.session_state.messages.append({"role": "assistant", "content": answer})
     
-    st.chat_message("user").write(prompt)
-    with st.chat_message("assistant"):
+    st.chat_message("user", avatar="👀").write(prompt)
+    with st.chat_message("assistant", avatar="💡"):
       st.markdown(answer)
       with st.expander("**Source documents**"):
         documents_content = ""
@@ -45,21 +47,35 @@ class Chatbot():
         st.markdown(documents_content)
   
   def run(self):
-    st.set_page_config(page_title="Catholic Chatbot",  layout="wide")
-    with st.sidebar:
-      st.button("Clear Chat History", on_click=self._clear_chat_history)
-    st.subheader("Catholic Chatbot")
+    img = Image.open("ui/praying.png")
+    img = img.resize((50, 50))
+    
+    st.set_page_config(page_title="CathWalk", layout="wide", page_icon=img)
 
+    st.subheader("CathWalk")
+    st.caption("Walk with Catholicism")
+    st.button("Clear Chat History", on_click=self._clear_chat_history)
+    
+    st.sidebar.image(img)
+    with open("ui/sidebar.md", "r") as sidebar_file:
+      sidebar_content = sidebar_file.read()
+    st.sidebar.markdown(sidebar_content)
+    st.sidebar.markdown('<a href="mailto:njbenann@gmail.com" style="text-decoration:none">Contact</a>', unsafe_allow_html=True)
+    st.sidebar.caption("Powered by Mixtral-8x7B-Instruct-v0.1 and all-MiniLM-L6-v2 using Hugging Face and Chroma")
+    
     if "messages" not in st.session_state:
       st.session_state.messages = [
         {
           "role": "assistant",
-          "content": "I am an expert in Catholicism. How can I assist you today?",
+          "content": "How can I assist you today?",
         }
       ]
     
     for msg in st.session_state.messages:
-      st.chat_message(msg["role"]).write(msg["content"])
+      if msg["role"] == "assistant":
+        st.chat_message(msg["role"], avatar="💡").write(msg["content"])
+      if msg["role"] == "human":
+        st.chat_message(msg["role"], avatar="👀").write(msg["content"])
 
     if prompt := st.chat_input():
       with st.spinner("Running..."):
