@@ -68,18 +68,18 @@ class RagChain():
     return chunks
 
   def _build(self):
-    # print("Loading Documents...")
+    print("Loading Documents...")
     documents = self._load_documents()
     
-    # print("Splitting documents into chunks...")
+    print("Splitting documents into chunks...")
     chunks = self._split_to_chunks(documents=documents)
     
-    # print("Initialize embeddings...")
+    print("Initialize embeddings...")
     embeddings = HuggingFaceInferenceAPIEmbeddings(
       api_key=self._HUGGING_FACE_API_KEY, 
       model_name="sentence-transformers/all-MiniLM-L6-v2") # https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
     
-    # print("Initialize vectorstore...")
+    print("Initialize vectorstore...")
     vector_store = ChromaVectorStorage(chunks=chunks, embeddings=embeddings).get_vector_store()
 
     # print("Perform similarity search...")
