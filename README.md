@@ -1,4 +1,4 @@
-# CathWalk, a Catholic Chatbot
+# CathWalk - A Catholic Chatbot
 
 CathWalk is a Retrieval-augmented generation (RAG) chatbot to encourage users to walk with Catholicism by providing guidance on personal concerns, Catholic teachings, and spiritual inspiration. It offers insights from scripture, including the deuterocanonical books, to bring comfort and clarity on their faith journey.
 
