@@ -17,9 +17,10 @@ import itertools
 LLM_NAME = 'mistralai/Mixtral-8x7B-Instruct-v0.1' # https://huggingface.co/mistralai/Mixtral-8x7B-Instruct-v0.1
 
 class RagChain():
-  def __init__(self, _HUGGING_FACE_API_KEY:str) -> None:
+  def __init__(self, _HUGGING_FACE_API_KEY:str, session_state) -> None:
     self._HUGGING_FACE_API_KEY = _HUGGING_FACE_API_KEY
     self.chain = None
+    self.session_state = session_state
     self.parent_path = Path(__file__).resolve().parent.parent.as_posix()
     self._build()
 
@@ -65,12 +66,17 @@ class RagChain():
     return chunks
 
   def _build(self):
-    print("Loading Documents...")
-    documents = self._load_documents()
-    
-    print("Splitting documents into chunks...")
-    chunks = self._split_to_chunks(documents=documents)
-    
+    if "init_done" not in self.session_state:
+      print("Loading Documents...")
+      documents = self._load_documents()
+      
+      print("Splitting documents into chunks...")
+      chunks = self._split_to_chunks(documents=documents)
+      
+      self.session_state["init_done"] = chunks
+    else:
+      chunks = self.session_state["init_done"]
+
     print("Initialize embeddings...")
     embeddings = HuggingFaceInferenceAPIEmbeddings(
       api_key=self._HUGGING_FACE_API_KEY, 

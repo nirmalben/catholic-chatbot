@@ -84,4 +84,4 @@ class Chatbot():
         self._get_response(prompt=prompt)
 
 if __name__ == "__main__":
-  Chatbot(rag=RagChain(st.secrets["HUGGING_FACE_API_KEY"])).run()
+  Chatbot(rag=RagChain(st.secrets["HUGGING_FACE_API_KEY"], st.session_state)).run()
