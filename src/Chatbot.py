@@ -55,7 +55,6 @@ class Chatbot():
     st.set_page_config(page_title="CathWalk", layout="wide", page_icon=img)
 
     st.subheader("CathWalk")
-    st.caption("Walk with Catholicism")
     st.button("Clear Chat History", on_click=self._clear_chat_history)
     
     st.sidebar.image(img)
