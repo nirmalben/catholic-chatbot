@@ -97,7 +97,7 @@ class Chatbot():
       if msg["role"] == "user":
         st.chat_message(msg["role"], avatar="👀").write(msg["content"])
 
-    if prompt := st.chat_input() or prompt:
+    if prompt := st.chat_input(placeholder="Ask me!") or prompt:
       self._get_response(prompt=prompt)
 
 if __name__ == "__main__":
