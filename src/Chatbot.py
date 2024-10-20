@@ -17,8 +17,14 @@ class Chatbot():
     self.rag.clear_memory()
     
   def _get_response(self, prompt):
-    response = self.rag.get_chain().invoke({"question": prompt})
-    
+    try:
+      response = self.rag.get_chain().invoke({"question": prompt})
+    except:
+      st.chat_message("user", avatar="👀").write(prompt)
+      st.chat_message("assistant", avatar="💡").write(
+        "Apologies! Something went wrong while processing your request. Please feel free to try again, rephrase your question or ask something else.")
+      return
+
     answer = response["answer"]
     # print(answer)
     # answer = answer[answer.find("Answer:") + len("Answer:") :]
@@ -75,8 +81,9 @@ class Chatbot():
     for msg in st.session_state.messages:
       if msg["role"] == "assistant":
         st.chat_message(msg["role"], avatar="💡").write(msg["content"])
-      if msg["role"] == "human":
+      if msg["role"] == "user":
         st.chat_message(msg["role"], avatar="👀").write(msg["content"])
+        
 
     if prompt := st.chat_input():
       with st.spinner("Running..."):
