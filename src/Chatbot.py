@@ -5,9 +5,9 @@ import streamlit as st
 
 SAMPLE_PROMPTS = [
   "How can you help me?",
-  "Share a verse from the book of Sirach",
+  "Share some verses from Sirach",
   "How can I forgive?",
-  "How can I pray to Mother Mary?"
+  "How can Mother Mary pray for me?"
 ]
 
 class Chatbot():
