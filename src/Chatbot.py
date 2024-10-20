@@ -4,7 +4,7 @@ from pathlib import Path
 import streamlit as st
 
 SAMPLE_PROMPTS = [
-  "What can you do for me?",
+  "How can you help me?",
   "Share a verse from the book of Sirach",
   "How can I forgive?"
 ]
