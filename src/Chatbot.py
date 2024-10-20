@@ -70,8 +70,7 @@ class Chatbot():
     st.set_page_config(page_title="CathWalk", layout="wide", page_icon=img)
 
     st.subheader("CathWalk")
-    st.caption("Your privacy is important; none of your questions or prompts are stored or shared.")
-    st.caption("I'm not perfect and may make mistakes. If unsure, please consult a human.")
+    st.caption("Your privacy is important; none of your questions or prompts are stored or shared. I'm not perfect and may make mistakes. If unsure, please consult a human.")
     sample_prompt_buttons = st.columns(len(SAMPLE_PROMPTS) + 1)
     for i, sample_prompt in enumerate(sample_prompt_buttons[:-1]):
       if sample_prompt.button(SAMPLE_PROMPTS[i], use_container_width=True):
