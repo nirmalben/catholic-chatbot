@@ -83,7 +83,7 @@ class Chatbot():
     st.sidebar.markdown(sidebar_content)
     st.sidebar.info('Coming soon: Miracles!', icon='⚡️')
     st.sidebar.markdown('<a href="mailto:njbenann@gmail.com" style="text-decoration:none">Contact</a>', unsafe_allow_html=True)
-    st.sidebar.caption("Powered by Mixtral-8x7B-Instruct-v0.1 and all-MiniLM-L6-v2 using Hugging Face and Chroma")
+    # st.sidebar.caption("Powered by Mixtral-8x7B-Instruct-v0.1 and all-MiniLM-L6-v2 using Hugging Face and Chroma")
     
     if "messages" not in st.session_state:
       st.session_state.messages = [
