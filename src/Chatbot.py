@@ -5,7 +5,7 @@ import streamlit as st
 
 SAMPLE_PROMPTS = [
   "How can you help me?",
-  "Share some verses from the book of Sirach",
+  "What does the Book of Sirach say about hard work?",
   "How can I forgive?",
   "How can Mother Mary pray for me?"
 ]
